@@ -1,10 +1,12 @@
 package no.sintef.vrp.vrp_backend.api.vrp;
 
+import jakarta.annotation.Resource;
 import no.sintef.vrp.vrp_backend.vrp.domain.VehicleRoutingSolution;
 import no.sintef.vrp.vrp_backend.vrp.persistance.VehicleRoutingSolutionRepository;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.solver.SolutionManager;
 import org.optaplanner.core.api.solver.SolverManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +23,9 @@ public class SolverController {
     private final AtomicReference<Throwable> solverError = new AtomicReference<>();
 
     private final VehicleRoutingSolutionRepository repository;
+    @Autowired
     private final SolverManager<VehicleRoutingSolution, Long> solverManager;
+    @Autowired
     private final SolutionManager<VehicleRoutingSolution, HardSoftLongScore> solutionManager;
 
     public SolverController(VehicleRoutingSolutionRepository repository,

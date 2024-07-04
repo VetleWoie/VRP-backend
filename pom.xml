@@ -35,6 +35,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.optaplanner/optaplanner-spring-boot-starter -->
+        <dependency>
+            <groupId>org.optaplanner</groupId>
+            <artifactId>optaplanner-spring-boot-starter</artifactId>
+            <version>9.44.0.Final</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
