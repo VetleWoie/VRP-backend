@@ -6,6 +6,7 @@ import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
+import org.optaplanner.core.api.solver.event.SolverEventListener;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 @PlanningSolution
 public class VehicleRoutingSolution {
 
-    private String name;
+    private long problem_id;
 
     @ProblemFactCollectionProperty
     private List<Location> locationList;
@@ -37,10 +38,10 @@ public class VehicleRoutingSolution {
     public VehicleRoutingSolution() {
     }
 
-    public VehicleRoutingSolution(String name,
+    public VehicleRoutingSolution(long problem_id,
                                   List<Location> locationList, List<Depot> depotList, List<Vehicle> vehicleList, List<Customer> customerList,
                                   Location southWestCorner, Location northEastCorner) {
-        this.name = name;
+        this.problem_id = problem_id;
         this.locationList = locationList;
         this.depotList = depotList;
         this.vehicleList = vehicleList;
@@ -61,12 +62,12 @@ public class VehicleRoutingSolution {
     }
 
 
-    public String getName() {
-        return name;
+    public Long getName() {
+        return problem_id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(Long problem_id) {
+        this.problem_id = problem_id;
     }
 
     public List<Location> getLocationList() {

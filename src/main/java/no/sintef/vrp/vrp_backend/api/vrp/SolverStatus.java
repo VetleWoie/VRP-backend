@@ -2,7 +2,7 @@ package no.sintef.vrp.vrp_backend.api.vrp;
 
 import no.sintef.vrp.vrp_backend.vrp.domain.VehicleRoutingSolution;
 
-class SolverStatus {
+public class SolverStatus {
 
     public final VehicleRoutingSolution solution;
     public final String scoreExplanation;

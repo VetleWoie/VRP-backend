@@ -111,7 +111,7 @@ public class MockDataBuilder {
                     + ") must be greater than southWestCorner.getLongitude(" + southWestCorner.getLongitude() + ").");
         }
 
-        String name = "demo";
+        long name = 0L;
 
         Random random = new Random(0);
         PrimitiveIterator.OfDouble latitudes = random
