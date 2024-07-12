@@ -1,17 +1,18 @@
 package no.sintef.vrp.vrp_backend.api.vrp;
 
 import no.sintef.vrp.vrp_backend.vrp.domain.Location;
-import no.sintef.vrp.vrp_backend.vrp.domain.MockDataBuilder;
-import no.sintef.vrp.vrp_backend.vrp.domain.VehicleRoutingSolution;
-import no.sintef.vrp.vrp_backend.vrp.domain.VehicleRoutingSolverEventListener;
-import no.sintef.vrp.vrp_backend.vrp.persistance.VehicleRoutingSolutionRepository;
+import no.sintef.vrp.vrp_backend.vrp.domain.RoutingPlan;
+import no.sintef.vrp.vrp_backend.vrp.domain.RoutingPlanSolverEventListener;
+import no.sintef.vrp.vrp_backend.vrp.persistance.RoutingPlanSolutionRepository;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.solver.SolutionManager;
 import org.optaplanner.core.api.solver.SolverManager;
-import org.optaplanner.core.api.solver.event.BestSolutionChangedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,66 +26,52 @@ public class SolverController {
     @Autowired
     private WebSocketHandler webSocketHandler;
 
-    private final VehicleRoutingSolutionRepository repository;
+    private final RoutingPlanSolutionRepository repository;
     @Autowired
-    private final SolverManager<VehicleRoutingSolution, Long> solverManager;
+    private final SolverManager<RoutingPlan, Long> solverManager;
     @Autowired
-    private final SolutionManager<VehicleRoutingSolution, HardSoftLongScore> solutionManager;
+    private final SolutionManager<RoutingPlan, HardSoftLongScore> solutionManager;
 
-    public SolverController(VehicleRoutingSolutionRepository repository,
-                          SolverManager<VehicleRoutingSolution, Long> solverManager,
-                          SolutionManager<VehicleRoutingSolution, HardSoftLongScore> solutionManager) {
+    public SolverController(RoutingPlanSolutionRepository repository,
+                            SolverManager<RoutingPlan, Long> solverManager,
+                            SolutionManager<RoutingPlan, HardSoftLongScore> solutionManager) {
         this.repository = repository;
         this.solverManager = solverManager;
         this.solutionManager = solutionManager;
     }
 
-    private SolverStatus statusFromSolution(VehicleRoutingSolution solution) {
+    private SolverStatus statusFromSolution(RoutingPlan solution) {
         return new SolverStatus(solution,
                 solutionManager.explain(solution).getSummary(),
-                solverManager.getSolverStatus(solution.getName()));
+                solverManager.getSolverStatus(solution.getId()));
     }
 
     @PostMapping("/solution")
     public Long createSolution(
-                               @RequestParam int customerCount,
-                               @RequestParam int depotCount,
-                               @RequestParam int vehicleCount,
-                               @RequestParam int vehicleCap,
-                               @RequestParam int maxDemand,
-                               @RequestParam int minDemand){
-        System.out.println("Create solution");
-        var testbuilder = MockDataBuilder.builder();
-        testbuilder.setCustomerCount(customerCount)
-                .setDepotCount(depotCount)
-                .setVehicleCount(vehicleCount)
-                .setVehicleCapacity(vehicleCap)
-                .setMaxDemand(maxDemand)
-                .setMinDemand(minDemand)
-                .setSouthWestCorner(new Location(0L,
-                        69.640282, 18.87))
-                .setNorthEastCorner(new Location(0L, 69.66, 18.98));
-        var solution = testbuilder.build();
-        solution.setName(PROBLEM_ID++);
-        System.out.println(solution.getName());
-        repository.update(solution, solution.getName());
-        return solution.getName();
+                               @RequestParam List<schema.DropOffInput> dropOffIndex,
+                               @RequestParam List<schema.PickUpInput> pickUpIndex,
+                               @RequestParam List<schema.VehicleInput> vehicleLocationIndex,
+                               //Todo Need to make a proper type for the distanceMatrix
+                               @RequestParam List<Integer> distanceMatrix){
+
+        //Todo create problem on demand
+        return 0L;
     }
 
     @PostMapping("/solve")
     public long solve(@RequestParam long problem_id) {
-        VehicleRoutingSolverEventListener solverEventListener = new VehicleRoutingSolverEventListener(problem_id, webSocketHandler);
-        Optional<VehicleRoutingSolution> maybeSolution = repository.solution(problem_id);
+        RoutingPlanSolverEventListener solverEventListener = new RoutingPlanSolverEventListener(problem_id, webSocketHandler);
+        Optional<RoutingPlan> maybeSolution = repository.solution(problem_id);
         System.out.println(maybeSolution.isPresent());
         maybeSolution.ifPresent(
-                vehicleRoutingSolution -> {
+                routingPlan -> {
                     //TODO: Remove this print, it was used only for testing purposes.
                     System.out.println("Calculating Solution...");
                     solverManager.solveAndListen(
-                            vehicleRoutingSolution.getName(),
-                            id -> vehicleRoutingSolution,
+                            routingPlan.getId(),
+                            id -> routingPlan,
                             bestSolution -> {
-                                repository.update(bestSolution, bestSolution.getName());
+                                repository.update(bestSolution, bestSolution.getId());
                                 solverEventListener.bestSolutionChanged(bestSolution);
                             },
                             (problemId, throwable) -> solverError.set(throwable));
@@ -94,16 +81,13 @@ public class SolverController {
     }
 
     @GetMapping("/status")
-    /**
-     * Only one status per now. This needs to be fixed: TODO
-     */
     public SolverStatus status(@RequestParam long problemId) {
         Optional.ofNullable(solverError.getAndSet(null)).ifPresent(throwable -> {
             throw new RuntimeException("Solver failed", throwable);
         });
-        Optional<VehicleRoutingSolution> maybeSolution = repository.solution(problemId);
-        VehicleRoutingSolution s = maybeSolution.orElse(VehicleRoutingSolution.empty());
-        return statusFromSolution(s);
+        Optional<RoutingPlan> maybeSolution = repository.solution(problemId);
+        RoutingPlan solution = maybeSolution.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solution not found"));
+        return statusFromSolution(solution);
     }
 
     @PostMapping("/stopSolving")

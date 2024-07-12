@@ -5,19 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.drools.core.management.DroolsManagementAgent.logger;
 
-public class VehicleRoutingSolverEventListener {
+public class RoutingPlanSolverEventListener {
 
     private final WebSocketHandler webSocketHandler;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Long problemId;
 
-    public VehicleRoutingSolverEventListener(Long problemId, WebSocketHandler webSocketHandler) {
+    public RoutingPlanSolverEventListener(Long problemId, WebSocketHandler webSocketHandler) {
         this.problemId = problemId;
         this.webSocketHandler = webSocketHandler;
     }
 
-    public void bestSolutionChanged(VehicleRoutingSolution newBestSolution) {
+    public void bestSolutionChanged(RoutingPlan newBestSolution) {
         try {
             String message = String.format(
                     "{feasable: %B, score: {hard: %d, soft: %d}}",
