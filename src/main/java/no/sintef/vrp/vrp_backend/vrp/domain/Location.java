@@ -10,26 +10,15 @@ import java.util.Map;
 public class Location {
 
     private final long id;
-    private final double latitude;
-    private final double longitude;
-    private Map<Location, Long> distanceMap;
+    private Map<Long, Long> distanceMap;
 
-    public Location(long id, double latitude, double longitude) {
+    public Location(long id, Map<Long, Long> distanceMap) {
         this.id = id;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.distanceMap = distanceMap;
     }
 
     public long getId() {
         return id;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
     }
 
     /**
@@ -37,7 +26,7 @@ public class Location {
      *
      * @param distanceMap a map containing distances from here to other locations
      */
-    public void setDistanceMap(Map<Location, Long> distanceMap) {
+    public void setDistanceMap(Map<Long, Long> distanceMap) {
         this.distanceMap = distanceMap;
     }
 
@@ -48,6 +37,6 @@ public class Location {
      * @return distance in meters
      */
     public long getDistanceTo(Location location) {
-        return distanceMap.get(location);
+        return distanceMap.get(location.id);
     }
 }

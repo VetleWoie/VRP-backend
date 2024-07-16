@@ -1,7 +1,6 @@
 package no.sintef.vrp.vrp_backend.vrp.persistance;
 
 import no.sintef.vrp.vrp_backend.vrp.domain.RoutingPlan;
-import no.sintef.vrp.vrp_backend.vrp.domain.VehicleRoutingSolution;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;

@@ -46,19 +46,19 @@ public class SolverController {
                 solverManager.getSolverStatus(solution.getId()));
     }
 
-    @PostMapping("/solution")
+    @PostMapping(
+            value="/solution",
+            consumes="application/json"
+    )
     public Long createSolution(
-                               @RequestParam List<schema.DropOffInput> dropOffIndex,
-                               @RequestParam List<schema.PickUpInput> pickUpIndex,
-                               @RequestParam List<schema.VehicleInput> vehicleLocationIndex,
-                               //Todo Need to make a proper type for the distanceMatrix
-                               @RequestParam List<Integer> distanceMatrix){
-
+            @RequestBody schema.NewProblem newProblem
+    ){
+        System.out.println(newProblem);
         //Todo create problem on demand
         return 0L;
     }
 
-    @PostMapping("/solve")
+    @PostMapping(value="/solve")
     public long solve(@RequestParam long problem_id) {
         RoutingPlanSolverEventListener solverEventListener = new RoutingPlanSolverEventListener(problem_id, webSocketHandler);
         Optional<RoutingPlan> maybeSolution = repository.solution(problem_id);
