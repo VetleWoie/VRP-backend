@@ -9,14 +9,35 @@ public class Task {
     private Location location;
     private int quantity;
     private boolean isPickup;
-
-    // Planning variable to assign a vehicle to a task
-    @PlanningVariable(valueRangeProviderRefs = "vehicleRange")
     private Vehicle vehicle;
+    private Task previousTask;
+
+
 
     // Planning variable to sequence tasks
     @PlanningVariable(valueRangeProviderRefs = "taskRange")
-    private Task previousTask;
+    public Task getPreviousTask() {
+        return previousTask;
+    }
+
+    // Planning variable to assign a vehicle to a task
+    @PlanningVariable(valueRangeProviderRefs = "vehicleRange")
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    // Planning variable to determine amount to pick up or drop off
+    @PlanningVariable(valueRangeProviderRefs = "quantityRange")
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public Task(long id, Location location, int quantity, boolean isPickup) {
+        this.id = id;
+        this.location = location;
+        this.quantity = quantity;
+        this.isPickup = isPickup;
+    }
 
     public long getId() {
         return id;
@@ -30,9 +51,6 @@ public class Task {
         this.location = location;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
@@ -46,26 +64,11 @@ public class Task {
         isPickup = pickup;
     }
 
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
-
     public void setVehicle(Vehicle vehicle) {
         this.vehicle = vehicle;
     }
 
-    public Task getPreviousTask() {
-        return previousTask;
-    }
-
     public void setPreviousTask(Task previousTask) {
         this.previousTask = previousTask;
-    }
-
-    public Task(long id, Location location, int quantity, boolean isPickup) {
-        this.id = id;
-        this.location = location;
-        this.quantity = quantity;
-        this.isPickup = isPickup;
     }
 }

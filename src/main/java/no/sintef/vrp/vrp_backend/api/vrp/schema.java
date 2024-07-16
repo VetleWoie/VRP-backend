@@ -4,14 +4,14 @@ import java.util.List;
 
 public class schema {
     public static class VehicleInput {
-        long capacity;
+        int capacity;
         int idx;
 
-        public long getCapacity() {
+        public int getCapacity() {
             return capacity;
         }
 
-        public void setCapacity(long capacity) {
+        public void setCapacity(int capacity) {
             this.capacity = capacity;
         }
 
@@ -36,11 +36,11 @@ public class schema {
             this.idx = idx;
         }
 
-        public long getAmountAvailable() {
+        public int getAmountAvailable() {
             return amountAvailable;
         }
 
-        public void setAmountAvailable(long amountAvailable) {
+        public void setAmountAvailable(int amountAvailable) {
             this.amountAvailable = amountAvailable;
         }
 
@@ -50,12 +50,12 @@ public class schema {
 
         String name;
         int idx;
-        long amountAvailable;
+        int amountAvailable;
     }
     public static class DropOffInput{
         String name;
         int idx;
-        long amountNeeded;
+        int amountNeeded;
 
         public String getName() {
             return name;
@@ -73,11 +73,11 @@ public class schema {
             this.idx = idx;
         }
 
-        public long getAmountNeeded() {
+        public int getAmountNeeded() {
             return amountNeeded;
         }
 
-        public void setAmountNeeded(long amountNeeded) {
+        public void setAmountNeeded(int amountNeeded) {
             this.amountNeeded = amountNeeded;
         }
     }
@@ -90,16 +90,16 @@ public class schema {
             this.name = name;
         }
 
-        public List<Double> getDistances() {
+        public List<Long> getDistances() {
             return distances;
         }
 
-        public void setDistances(List<Double> distances) {
+        public void setDistances(List<Long> distances) {
             this.distances = distances;
         }
 
         String name;
-        List<Double> distances;
+        List<Long> distances;
     }
     public static class NewProblem {
         @Override

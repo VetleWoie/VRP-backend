@@ -9,11 +9,13 @@ import java.util.Map;
 @JsonIgnoreProperties({ "id" })
 public class Location {
 
-    private final long id;
-    private Map<Long, Long> distanceMap;
+    private final int id;
+    private final String name;
+    private final Long[] distanceMap;
 
-    public Location(long id, Map<Long, Long> distanceMap) {
+    public Location(int id, String name, Long[] distanceMap) {
         this.id = id;
+        this.name = name;
         this.distanceMap = distanceMap;
     }
 
@@ -21,13 +23,8 @@ public class Location {
         return id;
     }
 
-    /**
-     * Set the distance map. Distances are in meters.
-     *
-     * @param distanceMap a map containing distances from here to other locations
-     */
-    public void setDistanceMap(Map<Long, Long> distanceMap) {
-        this.distanceMap = distanceMap;
+    public String getName() {
+        return name;
     }
 
     /**
@@ -36,7 +33,7 @@ public class Location {
      * @param location other location
      * @return distance in meters
      */
-    public long getDistanceTo(Location location) {
-        return distanceMap.get(location.id);
+    public Long getDistanceTo(Location location) {
+        return distanceMap[location.id];
     }
 }

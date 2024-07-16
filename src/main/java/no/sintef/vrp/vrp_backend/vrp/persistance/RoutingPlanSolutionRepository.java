@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-// TODO: FIXME: REPLACE WITH REAL PERSISTANCE (I.E POSTGRES)
 @Repository
 public class RoutingPlanSolutionRepository {
 
@@ -21,7 +20,7 @@ public class RoutingPlanSolutionRepository {
         return Optional.ofNullable(solutionMap.get(problemId));
     }
 
-    public void update(RoutingPlan vehicleRoutingSolution, Long problemId) {
-        this.solutionMap.put(problemId, vehicleRoutingSolution);
+    public void update(RoutingPlan routingPlan, Long problemId) {
+        this.solutionMap.put(problemId, routingPlan);
     }
 }

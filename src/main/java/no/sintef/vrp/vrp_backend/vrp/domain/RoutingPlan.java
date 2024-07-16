@@ -11,6 +11,14 @@ import java.util.List;
 
 @PlanningSolution
 public class RoutingPlan {
+    public RoutingPlan(long id, List<Vehicle> vehicleList, List<Task> taskList, List<PickupPoint> pickupPointList, List<DropOffPoint> dropOffPointList) {
+        this.id = id;
+        this.vehicleList = vehicleList;
+        this.taskList = taskList;
+        this.pickupPointList = pickupPointList;
+        this.dropOffPointList = dropOffPointList;
+    }
+
     public void setVehicleList(List<Vehicle> vehicleList) {
         this.vehicleList = vehicleList;
     }
@@ -62,6 +70,13 @@ public class RoutingPlan {
     @ValueRangeProvider(id = "taskRange")
     public List<Task> getTaskList() {
         return taskList;
+    }
+
+    @ValueRangeProvider(id = "quantityRange")
+    public List<Integer> getQuantityRange() {
+        // Define possible quantities to pick up
+        //TODO: Add possible pickup amounts
+        return List.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
     }
 
     public HardSoftScore getScore() {

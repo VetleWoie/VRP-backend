@@ -1,14 +1,10 @@
 package no.sintef.vrp.vrp_backend.vrp.domain;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.variable.PlanningListVariable;
+import org.optaplanner.core.api.domain.lookup.PlanningId;
 
 public class Vehicle {
-    private long id;
+    @PlanningId
+    private final long id;
     private Location startLocation;
     private int capacity;
 

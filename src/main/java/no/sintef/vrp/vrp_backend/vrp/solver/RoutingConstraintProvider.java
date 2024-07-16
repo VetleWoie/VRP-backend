@@ -60,17 +60,17 @@ public class RoutingConstraintProvider implements ConstraintProvider {
     private Constraint minimizeDistanceConstraint(ConstraintFactory factory) {
         return factory.forEach(Task.class)
                 .join(factory.forEach(Task.class), Joiners.equal(Task::getVehicle))
-                .penalizeLong("Minimize distance", HardSoftScore.ONE_SOFT, (task1, task2) -> calculateDistance(task1, task2));
+                .penalizeLong("Minimize distance", HardSoftScore.ONE_SOFT, this::calculateDistance);
     }
 
-    private long calculateDistance(Task task1, Task task2) {
+    private Long calculateDistance(Task task1, Task task2) {
         if (task1 == null || task2 == null || task1.getVehicle() != task2.getVehicle()) {
-            return 0;
+            return 0L;
         }
         Location location1 = task1.getLocation();
         Location location2 = task2.getLocation();
-        return (long) (Math.sqrt(Math.pow(location1.getLatitude() - location2.getLatitude(), 2)
-                + Math.pow(location1.getLongitude() - location2.getLongitude(), 2)) * 1000);
+
+        return location1.getDistanceTo(location2);
     }
 }
 
