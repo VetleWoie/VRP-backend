@@ -8,52 +8,41 @@ import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @PlanningSolution
 public class RoutingPlan {
-    public RoutingPlan(long id, List<Vehicle> vehicleList, List<Task> taskList, List<PickupPoint> pickupPointList, List<DropOffPoint> dropOffPointList) {
+
+    private Long id;
+
+    private List<Vehicle> vehicleList;
+    private List<Task> taskList;
+    private List<PickupPoint> pickupPointList;
+    private List<DropOffPoint> dropOffPointList;
+    private HardSoftScore score;
+
+    public RoutingPlan() {
+        // No-arg constructor required by OptaPlanner
+    }
+
+    public RoutingPlan(Long id, List<Vehicle> vehicleList, List<Task> taskList, List<PickupPoint> pickupPointList, List<DropOffPoint> dropOffPointList) {
         this.id = id;
         this.vehicleList = vehicleList;
         this.taskList = taskList;
         this.pickupPointList = pickupPointList;
         this.dropOffPointList = dropOffPointList;
     }
+// Getters and Setters
 
-    public void setVehicleList(List<Vehicle> vehicleList) {
-        this.vehicleList = vehicleList;
-    }
-
-    public void setTaskList(List<Task> taskList) {
-        this.taskList = taskList;
-    }
-
-    public void setPickupPointList(List<PickupPoint> pickupPointList) {
-        this.pickupPointList = pickupPointList;
-    }
-
-    public List<DropOffPoint> getDropOffPointList() {
-        return dropOffPointList;
-    }
-
-    public void setDropOffPointList(List<DropOffPoint> dropOffPointList) {
-        this.dropOffPointList = dropOffPointList;
-    }
-
-    private long id;
-    private List<Vehicle> vehicleList;
-    private List<Task> taskList;
-    private List<PickupPoint> pickupPointList;
-    private List<DropOffPoint> dropOffPointList;
-
-    @PlanningScore
-    private HardSoftScore score;
-
-    // Getters and Setters
-
-    @ProblemFactCollectionProperty
+    @PlanningEntityCollectionProperty
     @ValueRangeProvider(id = "vehicleRange")
     public List<Vehicle> getVehicleList() {
         return vehicleList;
+    }
+
+    public void setVehicleList(List<Vehicle> vehicleList) {
+        this.vehicleList = vehicleList;
     }
 
     @ProblemFactCollectionProperty
@@ -61,24 +50,35 @@ public class RoutingPlan {
         return pickupPointList;
     }
 
+    public void setPickupPointList(List<PickupPoint> pickupPointList) {
+        this.pickupPointList = pickupPointList;
+    }
+
     @ProblemFactCollectionProperty
-    public List<DropOffPoint> getDropoffPointList() {
+    public List<DropOffPoint> getDropOffPointList() {
         return dropOffPointList;
     }
 
-    @PlanningEntityCollectionProperty
+    public void setDropOffPointList(List<DropOffPoint> dropoffPointList) {
+        this.dropOffPointList = dropoffPointList;
+    }
+
+    @ProblemFactCollectionProperty
     @ValueRangeProvider(id = "taskRange")
     public List<Task> getTaskList() {
         return taskList;
     }
 
-    @ValueRangeProvider(id = "quantityRange")
-    public List<Integer> getQuantityRange() {
-        // Define possible quantities to pick up
-        //TODO: Add possible pickup amounts
-        return List.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
+    public void setTaskList(List<Task> taskList) {
+        this.taskList = taskList;
     }
 
+    @ValueRangeProvider(id = "quantityRange")
+    public List<Integer> getQuantityRange() {
+        return IntStream.rangeClosed(0,20).boxed().collect(Collectors.toList());
+    }
+
+    @PlanningScore
     public HardSoftScore getScore() {
         return score;
     }
@@ -87,12 +87,7 @@ public class RoutingPlan {
         this.score = score;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-    // other necessary methods
 }

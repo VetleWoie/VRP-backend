@@ -1,7 +1,7 @@
 package no.sintef.vrp.vrp_backend.vrp.domain;
 
 public class PickupPoint {
-    private final long id;
+    private  long id;
     private Location location;
     private int amountAvailable;
 
@@ -30,4 +30,5 @@ public class PickupPoint {
         this.location = location;
         this.amountAvailable = amountAvailable;
     }
+    public PickupPoint() {}
 }

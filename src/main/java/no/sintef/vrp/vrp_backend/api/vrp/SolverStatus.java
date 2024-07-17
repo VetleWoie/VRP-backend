@@ -9,6 +9,7 @@ public class SolverStatus {
     public final boolean isSolving;
 
     SolverStatus(RoutingPlan solution, String scoreExplanation, org.optaplanner.core.api.solver.SolverStatus solverStatus) {
+        System.out.println("Status: " + solverStatus);
         this.solution = solution;
         this.scoreExplanation = scoreExplanation;
         this.isSolving = solverStatus != org.optaplanner.core.api.solver.SolverStatus.NOT_SOLVING;

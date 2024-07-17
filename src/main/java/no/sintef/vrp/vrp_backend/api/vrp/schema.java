@@ -90,16 +90,16 @@ public class schema {
             this.name = name;
         }
 
-        public List<Long> getDistances() {
+        public List<Integer> getDistances() {
             return distances;
         }
 
-        public void setDistances(List<Long> distances) {
+        public void setDistances(List<Integer> distances) {
             this.distances = distances;
         }
 
         String name;
-        List<Long> distances;
+        List<Integer> distances;
     }
     public static class NewProblem {
         @Override

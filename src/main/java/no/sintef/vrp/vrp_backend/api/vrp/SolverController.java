@@ -43,6 +43,8 @@ public class SolverController {
     }
 
     private SolverStatus statusFromSolution(RoutingPlan solution) {
+        System.out.println(solutionManager.explain(solution).getSummary());
+        System.out.println(solverManager.getSolverStatus(solution.getId()));
         return new SolverStatus(solution,
                 solutionManager.explain(solution).getSummary(),
                 solverManager.getSolverStatus(solution.getId()));
@@ -62,21 +64,20 @@ public class SolverController {
                     return new Location(
                             idx,
                             loc.getName(),
-                            loc.getDistances().toArray(new Long[0])
+                            loc.getDistances().toArray(new Integer[0])
                     );
                 }).toArray(Location[]::new);
 
         List<Vehicle> vehicles = newProblem.vehicleInputList.stream().map(
                 (vehicle) -> new Vehicle(
-                        1,
+                        vehicle.getIdx(),
                         locations[vehicle.getIdx()],
                         vehicle.getCapacity()
                 )
         ).toList();
-
         List<DropOffPoint> dropOffs = newProblem.dropOffInputList.stream().map(
                 (dropOff) -> new DropOffPoint(
-                        1,
+                        dropOff.getIdx(),
                         locations[dropOff.getIdx()],
                         dropOff.getAmountNeeded()
                 )
@@ -84,7 +85,7 @@ public class SolverController {
 
         List<PickupPoint> pickUps = newProblem.pickUpInputList.stream().map(
                 (pickUp) -> new PickupPoint(
-                        1,
+                        pickUp.getIdx(),
                         locations[pickUp.getIdx()],
                         pickUp.getAmountAvailable()
                 )
@@ -94,13 +95,13 @@ public class SolverController {
         List<Task> tasks = new ArrayList<>();
         //Currently assuming all vehicles have the same capacity
         int vehicleCap = newProblem.vehicleInputList.get(0).capacity;
-
+        long id = 0L;
         //This might be a bit naive, but currently it will be stay like this
         for (DropOffPoint dropOffPoint : dropOffs) {
             int remaingCapacity = dropOffPoint.getAmountNeeded();
             while (remaingCapacity > 0) {
                 tasks.add(new Task(
-                        1,
+                        id++,
                         dropOffPoint.getLocation(),
                         Math.min(remaingCapacity, vehicleCap),
                         false
@@ -113,7 +114,7 @@ public class SolverController {
             int remaingCapacity = pickUpPoint.getAmountAvailable();
             while (remaingCapacity > 0) {
                 tasks.add(new Task(
-                        1L,
+                        id++,
                         pickUpPoint.getLocation(),
                         Math.min(remaingCapacity, vehicleCap),
                         true
@@ -140,7 +141,6 @@ public class SolverController {
         RoutingPlanSolverEventListener solverEventListener = new RoutingPlanSolverEventListener(problem_id, webSocketHandler);
         Optional<RoutingPlan> maybeSolution = repository.solution(problem_id);
         RoutingPlan routingPlan = maybeSolution.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solution not found"));
-        System.out.println(routingPlan);
         logger.info("Starting new solver");
         solverManager.solveAndListen(
                 routingPlan.getId(),
@@ -155,6 +155,8 @@ public class SolverController {
     @GetMapping("/status")
     public SolverStatus status(@RequestParam long problemId) {
         Optional.ofNullable(solverError.getAndSet(null)).ifPresent(throwable -> {
+            System.out.println("Error:");
+            System.out.println(throwable);
             throw new RuntimeException("Solver failed", throwable);
         });
         Optional<RoutingPlan> maybeSolution = repository.solution(problemId);

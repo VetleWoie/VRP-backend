@@ -1,30 +1,40 @@
 package no.sintef.vrp.vrp_backend.vrp.domain;
 
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
+import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@PlanningEntity
 public class Vehicle {
     @PlanningId
-    private final long id;
+    private long id;
     private Location startLocation;
     private int capacity;
 
+    @PlanningListVariable(valueRangeProviderRefs = "taskRange")
+    private List<Task> tasks = new ArrayList<Task>();
+
+    public Vehicle(){}
     public Vehicle(long id, Location startLocation, int capacity) {
         this.id = id;
         this.startLocation = startLocation;
         this.capacity = capacity;
     }
 
-    public long getId() {
-        return id;
+    public List<Task> getTasks() {
+        return tasks;
     }
 
-    @Override
-    public String toString() {
-        return "Vehicle{" +
-                "id=" + id +
-                ", startLocation=" + startLocation +
-                ", capacity=" + capacity +
-                '}';
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+
+    public long getId() {
+        return id;
     }
 
     public Location getStartLocation() {
@@ -41,5 +51,14 @@ public class Vehicle {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+    @Override
+    public String toString() {
+        return "Vehicle{" +
+                "id=" + id +
+                ", startLocation=" + startLocation +
+                ", capacity=" + capacity +
+                '}';
     }
 }

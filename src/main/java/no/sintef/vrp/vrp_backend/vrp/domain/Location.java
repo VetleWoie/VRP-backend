@@ -3,17 +3,17 @@ package no.sintef.vrp.vrp_backend.vrp.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.Map;
-
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
 @JsonIgnoreProperties({ "id" })
 public class Location {
 
-    private final int id;
-    private final String name;
-    private final Long[] distanceMap;
+    private int id;
+    private String name;
+    private Integer[] distanceMap;
 
-    public Location(int id, String name, Long[] distanceMap) {
+    public Location(){}
+
+    public Location(int id, String name, Integer[] distanceMap) {
         this.id = id;
         this.name = name;
         this.distanceMap = distanceMap;
@@ -33,7 +33,7 @@ public class Location {
      * @param location other location
      * @return distance in meters
      */
-    public Long getDistanceTo(Location location) {
+    public int getDistanceTo(Location location) {
         return distanceMap[location.id];
     }
 }

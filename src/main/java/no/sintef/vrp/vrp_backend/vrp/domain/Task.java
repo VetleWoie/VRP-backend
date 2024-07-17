@@ -1,42 +1,27 @@
 package no.sintef.vrp.vrp_backend.vrp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
-
-@PlanningEntity
 public class Task {
-    private final long id;
+    private long id;
     private Location location;
-    private int quantity;
+    private Integer quantity;
     private boolean isPickup;
-    private Vehicle vehicle;
-    private Task previousTask;
 
-
-
-    // Planning variable to sequence tasks
-    @PlanningVariable(valueRangeProviderRefs = "taskRange")
-    public Task getPreviousTask() {
-        return previousTask;
-    }
-
-    // Planning variable to assign a vehicle to a task
-    @PlanningVariable(valueRangeProviderRefs = "vehicleRange")
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
-
-    // Planning variable to determine amount to pick up or drop off
-    @PlanningVariable(valueRangeProviderRefs = "quantityRange")
-    public int getQuantity() {
-        return quantity;
-    }
+    public Task(){}
 
     public Task(long id, Location location, int quantity, boolean isPickup) {
         this.id = id;
         this.location = location;
         this.quantity = quantity;
         this.isPickup = isPickup;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
     }
 
     public long getId() {
@@ -51,8 +36,7 @@ public class Task {
         this.location = location;
     }
 
-
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
@@ -62,13 +46,5 @@ public class Task {
 
     public void setPickup(boolean pickup) {
         isPickup = pickup;
-    }
-
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    public void setPreviousTask(Task previousTask) {
-        this.previousTask = previousTask;
     }
 }

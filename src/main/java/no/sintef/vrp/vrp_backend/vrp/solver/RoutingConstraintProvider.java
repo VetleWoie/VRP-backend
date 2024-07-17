@@ -1,9 +1,6 @@
 package no.sintef.vrp.vrp_backend.vrp.solver;
 
-import no.sintef.vrp.vrp_backend.vrp.domain.DropOffPoint;
-import no.sintef.vrp.vrp_backend.vrp.domain.Location;
-import no.sintef.vrp.vrp_backend.vrp.domain.PickupPoint;
-import no.sintef.vrp.vrp_backend.vrp.domain.Task;
+import no.sintef.vrp.vrp_backend.vrp.domain.*;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
@@ -13,63 +10,103 @@ import org.optaplanner.core.api.score.stream.Joiners;
 
 public class RoutingConstraintProvider implements ConstraintProvider {
 
+
     @Override
     public Constraint[] defineConstraints(ConstraintFactory factory) {
         return new Constraint[]{
                 vehicleCapacityConstraint(factory),
                 pickupBeforeDropoffConstraint(factory),
+                minimizeDistanceConstraint(factory),
                 pickupPointAvailabilityConstraint(factory),
-                dropoffPointDemandConstraint(factory),
-                minimizeDistanceConstraint(factory)
+                dropoffPointDemandConstraint(factory)
         };
     }
 
     private Constraint vehicleCapacityConstraint(ConstraintFactory factory) {
-        return factory.forEach(Task.class)
-                .filter(Task::isPickup)
-                .groupBy(Task::getVehicle, ConstraintCollectors.sum(Task::getQuantity))
-                .filter((vehicle, totalQuantity) -> totalQuantity > vehicle.getCapacity())
-                .penalizeLong("Vehicle capacity exceeded", HardSoftScore.ONE_HARD, (vehicle, totalQuantity) -> totalQuantity - vehicle.getCapacity());
+        return factory.forEach(Vehicle.class)
+                .penalize("Vehicle capacity exceeded", HardSoftScore.ONE_HARD, vehicle -> {
+                    int pickedUp = 0;
+                    int penalty = 0;
+                    for (Task task : vehicle.getTasks()) {
+                        if (task.isPickup()) {
+                            pickedUp += task.getQuantity();
+                            if (pickedUp > vehicle.getCapacity()) {
+                                penalty += pickedUp - vehicle.getCapacity();
+                            }
+                        } else{
+                            pickedUp -= task.getQuantity();
+                        }
+                    }
+                    return penalty;
+                });
     }
 
     private Constraint pickupBeforeDropoffConstraint(ConstraintFactory factory) {
-        return factory.forEach(Task.class)
-                .filter(task -> !task.isPickup())
-                .join(factory.forEach(Task.class),
-                        Joiners.equal(Task::getVehicle),
-                        Joiners.lessThan(Task::getId, Task::getId))
-                .penalizeLong("Pickup before dropoff", HardSoftScore.ONE_HARD, (dropoffTask, pickupTask) -> 1L);
+        return factory.forEach(Vehicle.class)
+                .filter(vehicle -> vehicle.getTasks() != null)
+                .penalize("Pickup before dropoff", HardSoftScore.ONE_HARD, vehicle -> {
+                    int pickedUp = 0;
+                    int penalty = 0;
+                    for (Task task : vehicle.getTasks()) {
+                        if (task.isPickup()) {
+                            pickedUp += task.getQuantity();
+
+                        } else{
+                            pickedUp -= task.getQuantity();
+                            if (pickedUp < 0) {
+                                penalty += Math.abs(pickedUp);
+                            }
+                        }
+                    }
+                    return penalty;
+                });
     }
 
     private Constraint pickupPointAvailabilityConstraint(ConstraintFactory factory) {
         return factory.forEach(PickupPoint.class)
-                .join(factory.forEach(Task.class), Joiners.equal(PickupPoint::getLocation, Task::getLocation))
-                .groupBy((pickupPoint, task) -> pickupPoint, ConstraintCollectors.sum((pickupPoint, task) -> task.getQuantity()))
-                .filter((pickupPoint, totalQuantity) -> totalQuantity > pickupPoint.getAmountAvailable())
-                .penalizeLong("Pickup point availability exceeded", HardSoftScore.ONE_HARD, (pickupPoint, totalQuantity) -> totalQuantity - pickupPoint.getAmountAvailable());
+                .join(factory.forEach(Vehicle.class), Joiners.filtering((pickupPoint, vehicle) ->
+                        vehicle.getTasks().stream()
+                                .filter(task -> task.isPickup() && task.getLocation().equals(pickupPoint.getLocation()))
+                                .mapToInt(Task::getQuantity).sum() > pickupPoint.getAmountAvailable()))
+                .penalize("Pickup point availability exceeded", HardSoftScore.ONE_HARD, (pickupPoint, vehicle) -> {
+                    int totalQuantity = vehicle.getTasks().stream()
+                            .filter(task -> task.isPickup() && task.getLocation().equals(pickupPoint.getLocation()))
+                            .mapToInt(Task::getQuantity).sum();
+                    return totalQuantity - pickupPoint.getAmountAvailable();
+                });
     }
 
     private Constraint dropoffPointDemandConstraint(ConstraintFactory factory) {
         return factory.forEach(DropOffPoint.class)
-                .join(factory.forEach(Task.class), Joiners.equal(DropOffPoint::getLocation, Task::getLocation))
-                .groupBy((dropoffPoint, task) -> dropoffPoint, ConstraintCollectors.sum((dropoffPoint, task) -> task.getQuantity()))
-                .filter((dropoffPoint, totalQuantity) -> totalQuantity < dropoffPoint.getAmountNeeded())
-                .penalizeLong("Dropoff point demand not met", HardSoftScore.ONE_HARD, (dropoffPoint, totalQuantity) -> dropoffPoint.getAmountNeeded() - totalQuantity);
+                .join(factory.forEach(Vehicle.class), Joiners.filtering((dropoffPoint, vehicle) ->
+                        vehicle.getTasks().stream()
+                                .filter(task -> !task.isPickup() && task.getLocation().equals(dropoffPoint.getLocation()))
+                                .mapToInt(Task::getQuantity).sum() < dropoffPoint.getAmountNeeded()))
+                .penalize("Dropoff point demand not met", HardSoftScore.ONE_HARD, (dropoffPoint, vehicle) -> {
+                    int totalQuantity = vehicle.getTasks().stream()
+                            .filter(task -> !task.isPickup() && task.getLocation().equals(dropoffPoint.getLocation()))
+                            .mapToInt(Task::getQuantity).sum();
+                    return dropoffPoint.getAmountNeeded() - totalQuantity;
+                });
     }
 
     private Constraint minimizeDistanceConstraint(ConstraintFactory factory) {
-        return factory.forEach(Task.class)
-                .join(factory.forEach(Task.class), Joiners.equal(Task::getVehicle))
-                .penalizeLong("Minimize distance", HardSoftScore.ONE_SOFT, this::calculateDistance);
+        return factory.forEach(Vehicle.class)
+                .penalize("Minimize distance", HardSoftScore.ONE_SOFT, vehicle -> {
+                    int distance = 0;
+                    Location previousLocation = vehicle.getStartLocation();
+                    for (Task task : vehicle.getTasks()) {
+                        distance += calculateDistance(previousLocation, task.getLocation());
+                        previousLocation = task.getLocation();
+                    }
+                    return distance;
+                });
     }
 
-    private Long calculateDistance(Task task1, Task task2) {
-        if (task1 == null || task2 == null || task1.getVehicle() != task2.getVehicle()) {
-            return 0L;
+    private int calculateDistance(Location location1, Location location2) {
+        if (location1 == null || location2 == null) {
+            return 0;
         }
-        Location location1 = task1.getLocation();
-        Location location2 = task2.getLocation();
-
         return location1.getDistanceTo(location2);
     }
 }

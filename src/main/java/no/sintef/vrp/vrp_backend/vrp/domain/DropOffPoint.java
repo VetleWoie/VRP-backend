@@ -1,7 +1,7 @@
 package no.sintef.vrp.vrp_backend.vrp.domain;
 
 public class DropOffPoint {
-    private final long id;
+    private long id;
     private Location location;
     private int amountNeeded;
 
@@ -30,4 +30,5 @@ public class DropOffPoint {
         this.location = location;
         this.amountNeeded = amountNeeded;
     }
+    public DropOffPoint() {}
 }
